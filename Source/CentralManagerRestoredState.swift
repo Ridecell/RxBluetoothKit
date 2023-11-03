@@ -1,5 +1,5 @@
-import Foundation
 import CoreBluetooth
+import Foundation
 
 /// It should be deleted when `RestoredState` will be deleted
 protocol CentralManagerRestoredStateType {
@@ -60,7 +60,16 @@ public struct CentralManagerRestoredState: CentralManagerRestoredStateType {
         let cbServices = arrayOfAnyObjects.flatMap { $0 as? CBService }
         #endif
 
-        return cbServices.map { Service(peripheral: centralManager.retrievePeripheral(for: $0.peripheral),
-                                        service: $0) }
+        return cbServices.compactMap {
+            let maybePeripheral: CBPeripheral? = $0.peripheral
+            guard let peripheral = maybePeripheral else {
+                return nil
+            }
+
+            return Service(
+                peripheral: centralManager.retrievePeripheral(for: peripheral),
+                service: $0
+            )
+        }
     }
 }
